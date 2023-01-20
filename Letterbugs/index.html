@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang = "en" >
+
+<head >
+    <meta charset = "UTF-8" >
+    <meta content = "IE=edge" http-equiv = "X-UA-Compatible" >
+    <meta content = "width=device-width, initial-scale=1.0" name = "viewport" >
+    <title >Letterbug puzzle</title >
+    <script src = "./fabric.min.js" ></script >
+    <link href = "./1.css" rel = "stylesheet" >
+</head >
+
+<body >
+    <div class = "box" >
+        <div >
+            <h5 >Letterbug puzzle</h5 >
+        </div >
+        <div class = "data_list" >
+            <div class = "data_item img1" draggable = "true" ondragstart = "onDragstart('img1')" >
+                <img alt = "" src = "./letters/l.png" style = "width: 66%" >
+            
+            </div >
+            <div class = "data_item img2" draggable = "true" ondragstart = "onDragstart('img2')" >
+                <img alt = "" src = "./letters/ee.png" style = "width: 100%" >
+            
+            </div >
+            <div class = "data_item img3" draggable = "true" ondragstart = "onDragstart('img3')" >
+                <img alt = "" src = "./letters/tt.png" style = "width: 100%" >
+            
+            </div >
+            <div class = "data_item img4" draggable = "true" ondragstart = "onDragstart('img4')" >
+                <img alt = "" src = "./letters/t.png" style = "width: 100%" >
+            
+            </div >
+            <div class = "data_item img5" draggable = "true" ondragstart = "onDragstart('img5')" >
+                <img alt = "" src = "./letters/e.png" style = "width: 62%" >
+            
+            </div >
+            <div class = "data_item img6" draggable = "true" ondragstart = "onDragstart('img6')" >
+                <img alt = "" src = "./letters/r.png" style = "width: 142%" >
+            
+            </div >
+            <div class = "data_item img7" draggable = "true" ondragstart = "onDragstart('img7')" >
+                <img alt = "" src = "./letters/b.png" style = "width: 100%" >
+            
+            </div >
+            <div class = "data_item img8" draggable = "true" ondragstart = "onDragstart('img8')" style = "margin: 0 16px" >
+                <img alt = "" src = "./letters/U2.png" style = "width: 100%;width: 90px;" >
+            
+            </div >
+            <div class = "data_item img9" draggable = "true" ondragstart = "onDragstart('img9')" >
+                <img alt = "" src = "./letters/g.png" style = "width: 100%" >
+            
+            </div >
+            <div class = "data_item img10" draggable = "true" ondragstart = "onDragstart('img10')" >
+                <img alt = "" src = "./letters/s.png" style = "width: 50%" >
+            
+            </div >
+            <div class = "data_item img11" draggable = "true" ondragstart = "onDragstart('img11')" >
+                <img alt = "" src = "./letters/gantan.png" style = "width: 20%" >
+            
+            </div >
+        </div >
+        <canvas id = "c" style = "border: 1px solid #ccc;" ></canvas >
+        <div id = "btn" >
+            <img alt = "" src = "./letters/reset%20button.png" >
+        </div >
+    </div >
+    
+    <script >
+        let currentElType = null
+        let canvas = null
+        //
+        let btn = document.getElementById('btn')
+        let c = document.getElementById("c").getContext("2d");
+        btn.onclick = function () {
+            c.clearRect(0, 0, 800, 500);
+            location.reload()
+        }
+        
+        function initCanvas () {
+            // 
+            canvas = new fabric.Canvas('c', {
+                width: 800,
+                height: 500
+            })
+            
+            // 
+            canvas.on('mouse:down', function (opt) {
+                let evt = opt.e;
+                if (evt.altKey === true) {
+                    this.isDragging = true
+                    this.lastPosX = evt.clientX
+                    this.lastPosY = evt.clientY
+                }
+            })
+            
+            // 
+            canvas.on('mouse:move', function (opt) {
+                if (this.isDragging) {
+                    let e = opt.e;
+                    let vpt = this.viewportTransform;
+                    vpt[4] += e.clientX - this.lastPosX
+                    vpt[5] += e.clientY - this.lastPosY
+                    this.requestRenderAll()
+                    this.lastPosX = e.clientX
+                    this.lastPosY = e.clientY
+                }
+            })
+            
+            // 
+            canvas.on('mouse:up', function (opt) {
+                this.setViewportTransform(this.viewportTransform)
+                this.isDragging = false
+            })
+            
+            // 
+            canvas.on('mouse:wheel', opt => {
+                const delta = opt.e.deltaY
+                let zoom = canvas.getZoom()
+                zoom *= 0.999 ** delta
+                if (zoom > 20) zoom = 20
+                if (zoom < 0.01) zoom = 0.01
+                
+                // 
+                canvas.zoomToPoint({
+                            x: opt.e.offsetX,
+                            y: opt.e.offsetY
+                        },
+                        zoom // 
+                )
+            })
+        }
+        
+        initCanvas()
+        
+        function onDragstart (type) {
+            currentType = type
+        }
+        
+        canvas.on('drop', function (opt) {
+            
+            // 
+            let offset = {
+                left: canvas.getSelectionElement().getBoundingClientRect().left,
+                top: canvas.getSelectionElement().getBoundingClientRect().top
+            }
+            
+            let point = {
+                x: opt.e.x - offset.left,
+                y: opt.e.y - offset.top,
+            }
+            
+            let pointerVpt = canvas.restorePointerVpt(point)
+            
+            switch (currentType) {
+                case 'img1':
+                    createImg1(pointerVpt.y, pointerVpt.x)
+                    break
+                case 'img2':
+                    createImg2(pointerVpt.y, pointerVpt.x)
+                    break
+                case 'img3':
+                    createImg3(pointerVpt.y, pointerVpt.x)
+                    break
+                case 'img4':
+                    createImg4(pointerVpt.y, pointerVpt.x)
+                    break
+                case 'img5':
+                    createImg5(pointerVpt.y, pointerVpt.x)
+                    break
+                case 'img6':
+                    createImg6(pointerVpt.y, pointerVpt.x)
+                    break
+                case 'img7':
+                    createImg7(pointerVpt.y, pointerVpt.x)
+                    break
+                case 'img8':
+                    createImg8(pointerVpt.y, pointerVpt.x)
+                    break
+                case 'img9':
+                    createImg9(pointerVpt.y, pointerVpt.x)
+                    break
+                case 'img10':
+                    createImg10(pointerVpt.y, pointerVpt.x)
+                    break
+                case 'img11':
+                    createImg11(pointerVpt.y, pointerVpt.x)
+                    break
+            }
+            currentElType = null
+        })
+        
+        function createImg1 (top, left) {
+            fabric.Image.fromURL('./letters/l.png', oImg => {
+                oImg.top = top
+                oImg.left = left
+                canvas.add(oImg)
+            })
+        }
+        
+        function createImg2 (top, left) {
+            fabric.Image.fromURL('./letters/ee.png', oImg => {
+                oImg.top = top
+                oImg.left = left
+                canvas.add(oImg)
+            })
+        }
+        
+        function createImg3 (top, left) {
+            fabric.Image.fromURL('./letters/tt.png', oImg => {
+                oImg.top = top
+                oImg.left = left
+                canvas.add(oImg)
+            })
+        }
+        
+        function createImg4 (top, left) {
+            fabric.Image.fromURL('./letters/t.png', oImg => {
+                oImg.top = top
+                oImg.left = left
+                canvas.add(oImg)
+            })
+        }
+        
+        function createImg5 (top, left) {
+            fabric.Image.fromURL('./letters/e.png', oImg => {
+                oImg.top = top
+                oImg.left = left
+                canvas.add(oImg)
+            })
+        }
+        
+        function createImg6 (top, left) {
+            fabric.Image.fromURL('./letters/r.png', oImg => {
+                oImg.top = top
+                oImg.left = left
+                canvas.add(oImg)
+            })
+        }
+        
+        function createImg7 (top, left) {
+            fabric.Image.fromURL('./letters/b.png', oImg => {
+                oImg.top = top
+                oImg.left = left
+                canvas.add(oImg)
+            })
+        }
+        
+        function createImg8 (top, left) {
+            fabric.Image.fromURL('./letters/U2.png', oImg => {
+                oImg.top = top
+                oImg.left = left
+                canvas.add(oImg)
+            })
+        }
+        
+        function createImg9 (top, left) {
+            fabric.Image.fromURL('./letters/g.png', oImg => {
+                oImg.top = top
+                oImg.left = left
+                canvas.add(oImg)
+            })
+        }
+        
+        function createImg10 (top, left) {
+            fabric.Image.fromURL('./letters/s.png', oImg => {
+                oImg.top = top
+                oImg.left = left
+                canvas.add(oImg)
+            })
+        }
+        
+        function createImg11 (top, left) {
+            fabric.Image.fromURL('./letters/gantan.png', oImg => {
+                oImg.top = top
+                oImg.left = left
+                canvas.add(oImg)
+            })
+        }
+    </script >
+</body >
+</html >
